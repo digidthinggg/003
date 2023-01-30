@@ -11,39 +11,101 @@ contract Wallet {
     layerAddr = _layerAddr;
   }
 
-  struct amount = {
+
+  struct amountMinMax = {
     min: uint256,
     max: uint256
   }
 
-  string[] tokens;
+  string[] tokensArr;
 
   Layer[][] layerFlow;
 
   struct Requirement = {
-    amount: amount;
-    tokens: tokens;
+    amount: amountMinMax;
+    tokens: tokensArr;
     layerFlow: layerFlow;
   }
 
-  // Requirements for user to add a layer.
+
+  // Requirements to add a layer.
   Requirement[] addLayerRequirements;
 
-  // Requirements for user to update a layer.
-  Requirement[] updateLayerRequirements;
-
-  // Requirements for a user to remove a layer.
+  // Requirements to remove a layer.
   Requirement[] removeLayerRequirements;
 
-  // Requirements for a user to withdraw their tokens from product.
+  // Requirements to reverse secured tokens.
   Requirement[] reversalRequirements;
-  
-  // Requirements for a user to make a transfer.
+
+  // Requirements to make a transfer.
   Requirement[] transferRequirements;
+
+
+  // Add a layer to layerFlow in Requirement.
+  struct AddLayer {
+
+    // Layer to add.
+    Layer layer;
+
+    // Find.
+    // Match amount.
+    amount: amountMinMax;
+    // Match tokens.
+    tokens: tokensArr;
+    // Index.
+    layerFlowRow: uint256;
+    layerFlowCol: uint256;
+
+    // Requirements to add layer.
+    Requirement[] layerRequirements;
+  }
+
+  // We need initialized AddLayer struct. One only.
+
+  // Pending add layers.
+  AddLayer[] addLayerQueue;
+
+  /**
+    * Update is remove and add.
+    */
+
+  struct RemoveLayer {
+    Layer layer;
+    uint256 layerCol;
+
+    Requirement[] layerRequirements;
+  }
+
+  // Pending remove layers.
+  RemoveLayer[] removeLayerQueue;
+
+
+  struct Reversal {
+    amount: uint256;
+    tokens: tokensArr;
+    Requirement[] layerRequirements;
+  }
+
+  // Pending reversals.
+  Reversal[] reversalQueue;
+
+
+  struct Transfer {
+    uint256 transferNum;
+    address receiver;
+    uint256 amount;
+    Requirement[] layerRequirements;
+    bool executed;
+  }
+
+  // Pending transfers.
+  Transfer[] transferQueue;
+
 
   event HandleLayerStartedEV();
   event HandleLayerSuccessEV();
   event HandleLayerFailureEV();
+
 
   function test() public virtual {
     require(address(layerAddr) != address(0), "layerAddr is not set");
@@ -61,5 +123,9 @@ contract Wallet {
 
   function handleLayerFailure() external {
     emit HandleLayerFailureEV();
+  }
+
+  function executeTransfer() {
+    //
   }
 }
